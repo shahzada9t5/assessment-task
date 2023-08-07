@@ -35,7 +35,7 @@ class ApiService
      * @return void
      * @throws RuntimeException
      */
-    public function sendPayout(string $email, float $amount)
+    public function asendPayout(string $email, float $amount)
     {
         //
     }

@@ -34,5 +34,17 @@ class PayoutOrderJob implements ShouldQueue
     public function handle(ApiService $apiService)
     {
         // TODO: Complete this method
+        try {
+            $email = $this->order->affiliate->user->email;
+            $amount = $this->order->subtotal;
+            $apiService->sendPayout($email, $amount);
+
+            $this->order->payout_status = Order::STATUS_PAID;
+            $this->order->save();
+
+        } catch (\Exception $e) {
+            throw new \Exception('Payout process failed .');
+            return false;
+        }
     }
 }

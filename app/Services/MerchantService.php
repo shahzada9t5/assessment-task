@@ -7,6 +7,7 @@ use App\Models\Affiliate;
 use App\Models\Merchant;
 use App\Models\Order;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class MerchantService
 {
@@ -20,7 +21,23 @@ class MerchantService
      */
     public function register(array $data): Merchant
     {
-        // TODO: Complete this method
+        try {
+            // TODO: Complete this method
+            $user = User::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'password' => $data['api_key'],
+                'type' => User::TYPE_MERCHANT
+            ]);
+
+            return Merchant::create([
+                'domain' => $data['domain'],
+                'user_id' => $user->id,
+                'display_name' => $data['name']
+            ]);
+        }catch(\Exception $e){
+            Log::error("Merchant Service Exception: ". $e->getMessage());
+        }
     }
 
     /**
@@ -32,6 +49,22 @@ class MerchantService
     public function updateMerchant(User $user, array $data)
     {
         // TODO: Complete this method
+
+        $merchant = $user->merchant;
+
+        if (!$merchant) {
+            return;
+        }
+
+        $merchant->domain=$data['domain'];
+        $merchant->display_name=$data['name'];
+        if($merchant->save()) {
+            $user->email = $data['email'];
+            $user->name = $data['name'];
+            $user->password = $data['api_key'];
+            $user->save();
+        }
+        return;
     }
 
     /**
@@ -44,6 +77,12 @@ class MerchantService
     public function findMerchantByEmail(string $email): ?Merchant
     {
         // TODO: Complete this method
+
+        $merchant = Merchant::whereHas('user', function ($q) use ($email) {
+            $q->where('email', $email);
+        })->first();
+
+        return $merchant;
     }
 
     /**
@@ -56,5 +95,16 @@ class MerchantService
     public function payout(Affiliate $affiliate)
     {
         // TODO: Complete this method
+        try{
+            $unpaidOrders = Order::where('affiliate_id', $affiliate->id)
+                ->where('payout_status', Order::STATUS_UNPAID)
+                ->get();
+
+            foreach ($unpaidOrders as $order) {
+                dispatch(new PayoutOrderJob($order));
+            }
+        }catch (\Exception $e) {
+            Log::error("Order Payout Failed :". $e->getMessage());
+        }
     }
 }
