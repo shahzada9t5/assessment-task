@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\CrawlerController;
 use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\WebhookController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,7 +20,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/auth/redirect', function () {
+    //return Socialite::driver('wia')->redirect();
+});
 
-Route::post('/webhook', WebhookController::class)->name('webhook');
+Route::get('/crawler-amazon', [CrawlerController::class, 'index']);
+
+//Route::post('/webhook', WebhookController::class)->name('webhook');
 
 Route::get('/merchant/order-stats', [MerchantController::class, 'orderStats'])->name('merchant.order-stats');

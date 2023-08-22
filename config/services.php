@@ -30,5 +30,11 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'wia' => [
+        'base_uri' => env('WIA_URI'),
+        'client_id' => env('WIA_CLIENT_ID'),
+        'client_secret' => env('WIA_CLIENT_SECRET'),
+        'redirect' => env('WIA_REDIRECT_URI'),
+    ],
 
 ];
